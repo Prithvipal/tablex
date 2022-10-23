@@ -79,6 +79,7 @@ func FromCSV(path string) (*table, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	reader := csv.NewReader(f)
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -94,6 +95,28 @@ func FromCSV(path string) (*table, error) {
 	}
 
 	return t, nil
+}
+
+func (t *table) WriteCSV(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	writer := csv.NewWriter(f)
+
+	records := make([][]string, len(t.rows)+1)
+	records[0] = t.columns
+	for idx, row := range t.rows {
+		record := make([]string, len(row))
+		for jIdx, item := range row {
+			// fmt.Println(fmt.Sprintf("%v", item))
+			record[jIdx] = strings.Trim(fmt.Sprintf("%v", item), " ")
+		}
+		records[idx+1] = record
+	}
+	writer.WriteAll(records)
+	return nil
 }
 
 func (t *table) AddRow(row []any) {
