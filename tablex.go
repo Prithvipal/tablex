@@ -9,14 +9,59 @@ const (
 	PADDING = 3
 )
 
-type Tablex struct {
-	columns []string
+type tablex struct {
+	columns columns
 	width   []int
-	rows    [][]any
+	rows    []row
 }
 
-func NewTablex(columns []string) *Tablex {
-	t := &Tablex{
+type columns []string
+
+func (col columns) Draw(s *strings.Builder, width []int) {
+	s.WriteString("+")
+	for idx := range col {
+		s.WriteString(strings.Repeat("-", width[idx]))
+		s.WriteString("+")
+	}
+	s.WriteString("\n")
+	for idx, col := range col {
+		s.WriteString("|")
+		s.WriteString(" ")
+		s.WriteString(col)
+		s.WriteString(strings.Repeat(" ", width[idx]-len(col)-1))
+	}
+	s.WriteString("|")
+	s.WriteString("\n")
+	s.WriteString("+")
+	for idx := range col {
+		s.WriteString(strings.Repeat("=", width[idx]))
+		s.WriteString("+")
+	}
+	s.WriteString("\n")
+}
+
+type row []any
+
+func (r row) Draw(s *strings.Builder, width []int) {
+	for idx, item := range r {
+		s.WriteString("|")
+		s.WriteString(" ")
+		colItem := fmt.Sprintf("%v", item)
+		s.WriteString(colItem)
+		s.WriteString(strings.Repeat(" ", width[idx]-len(colItem)-1))
+	}
+	s.WriteString("|")
+	s.WriteString("\n")
+	s.WriteString("+")
+	for idx := range r {
+		s.WriteString(strings.Repeat("-", width[idx]))
+		s.WriteString("+")
+	}
+	s.WriteString("\n")
+}
+
+func NewTablex(columns []string) *tablex {
+	t := &tablex{
 		columns: columns,
 		width:   make([]int, len(columns)),
 	}
@@ -27,7 +72,7 @@ func NewTablex(columns []string) *Tablex {
 	return t
 }
 
-func (t *Tablex) AddRow(row []any) {
+func (t *tablex) AddRow(row []any) {
 	for idx, ele := range row {
 		eleS := ele.(string)
 		if len(string(eleS))+PADDING > t.width[idx] {
@@ -37,50 +82,13 @@ func (t *Tablex) AddRow(row []any) {
 	t.rows = append(t.rows, row)
 }
 
-func (t *Tablex) Draw() {
+func (t *tablex) Draw() {
 	s := strings.Builder{}
-	s.WriteString("+")
-	for idx := range t.columns {
-		s.WriteString(strings.Repeat("-", t.width[idx]))
-		s.WriteString("+")
-	}
-	s.WriteString("\n")
-	for idx, col := range t.columns {
-		s.WriteString("|")
-		s.WriteString(" ")
-		s.WriteString(col)
-		s.WriteString(strings.Repeat(" ", t.width[idx]-len(col)-1))
-	}
-	s.WriteString("|")
-	s.WriteString("\n")
-	s.WriteString("+")
-	for idx := range t.columns {
-		s.WriteString(strings.Repeat("=", t.width[idx]))
-		s.WriteString("+")
-	}
-	s.WriteString("\n")
-
-	//===== ROWSSS
+	t.columns.Draw(&s, t.width)
 
 	for _, row := range t.rows {
-
-		for idx, item := range row {
-			s.WriteString("|")
-			s.WriteString(" ")
-			colItem := fmt.Sprintf("%v", item)
-			s.WriteString(colItem)
-			s.WriteString(strings.Repeat(" ", t.width[idx]-len(colItem)-1))
-		}
-		s.WriteString("|")
-		s.WriteString("\n")
-		s.WriteString("+")
-		for idx := range t.columns {
-			s.WriteString(strings.Repeat("-", t.width[idx]))
-			s.WriteString("+")
-		}
+		row.Draw(&s, t.width)
 	}
-	s.WriteString("\n")
 
 	fmt.Println(s.String())
-
 }
