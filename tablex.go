@@ -58,6 +58,28 @@ func (t *Tablex) Draw() {
 		s.WriteString(strings.Repeat("=", t.width[idx]))
 		s.WriteString("+")
 	}
+	s.WriteString("\n")
+
+	//===== ROWSSS
+
+	for _, row := range t.rows {
+
+		for idx, item := range row {
+			s.WriteString("|")
+			s.WriteString(" ")
+			colItem := fmt.Sprintf("%v", item)
+			s.WriteString(colItem)
+			s.WriteString(strings.Repeat(" ", t.width[idx]-len(colItem)-1))
+		}
+		s.WriteString("|")
+		s.WriteString("\n")
+		s.WriteString("+")
+		for idx := range t.columns {
+			s.WriteString(strings.Repeat("-", t.width[idx]))
+			s.WriteString("+")
+		}
+	}
+	s.WriteString("\n")
 
 	fmt.Println(s.String())
 
