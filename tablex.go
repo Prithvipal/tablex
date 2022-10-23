@@ -9,7 +9,7 @@ const (
 	PADDING = 3
 )
 
-type tablex struct {
+type table struct {
 	columns columns
 	width   []int
 	rows    []row
@@ -60,8 +60,8 @@ func (r row) Draw(s *strings.Builder, width []int) {
 	s.WriteString("\n")
 }
 
-func NewTablex(columns []string) *tablex {
-	t := &tablex{
+func NewTablex(columns []string) *table {
+	t := &table{
 		columns: columns,
 		width:   make([]int, len(columns)),
 	}
@@ -72,7 +72,7 @@ func NewTablex(columns []string) *tablex {
 	return t
 }
 
-func (t *tablex) AddRow(row []any) {
+func (t *table) AddRow(row []any) {
 	for idx, ele := range row {
 		eleS := ele.(string)
 		if len(string(eleS))+PADDING > t.width[idx] {
@@ -82,7 +82,25 @@ func (t *tablex) AddRow(row []any) {
 	t.rows = append(t.rows, row)
 }
 
-func (t *tablex) Draw() {
+func (t *table) DeleteLastRow() {
+	t.rows = t.rows[:len(t.rows)-1]
+}
+
+func (t *table) DeleteFirstRow() {
+	t.rows = t.rows[1:len(t.rows)]
+}
+
+func (t *table) DeleteRowNByIndex(i int) error {
+	if i < 0 || i >= len(t.rows) {
+		return fmt.Errorf("The given index is out of bounds.")
+	}
+
+	newRow := append(t.rows[:i], t.rows[i+1:]...)
+	t.rows = newRow
+	return nil
+}
+
+func (t *table) Draw() {
 	s := strings.Builder{}
 	t.columns.Draw(&s, t.width)
 
