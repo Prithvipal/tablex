@@ -1,7 +1,9 @@
 package tablex
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -70,6 +72,28 @@ func NewTablex(columns []string) *table {
 	}
 
 	return t
+}
+
+func FromCSV(path string) (*table, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	reader := csv.NewReader(f)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	t := NewTablex(records[0])
+	for i := 1; i < len(records); i++ {
+		row := make([]any, len(records[i]))
+		for idx, item := range records[i] {
+			row[idx] = item
+		}
+		t.AddRow(row)
+	}
+
+	return t, nil
 }
 
 func (t *table) AddRow(row []any) {
