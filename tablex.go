@@ -92,7 +92,7 @@ func (t *table) DeleteFirstRow() {
 
 func (t *table) DeleteRowNByIndex(i int) error {
 	if i < 0 || i >= len(t.rows) {
-		return fmt.Errorf("The given index is out of bounds.")
+		return fmt.Errorf("the given index is out of bounds")
 	}
 
 	newRow := append(t.rows[:i], t.rows[i+1:]...)
